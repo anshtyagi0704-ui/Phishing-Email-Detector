@@ -1,0 +1,80 @@
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class EmailAnalyzer {
+
+    public static class Result {
+        public boolean phishing;
+        public int riskScore;
+        public List<String> reasons;
+
+        public Result(boolean phishing, int riskScore,
+                      List<String> reasons) {
+            this.phishing = phishing;
+            this.riskScore = riskScore;
+            this.reasons = reasons;
+        }
+    }
+
+    public static Result analyze(String subject, String message) {
+
+        String email = (subject + " " + message)
+                .toLowerCase();
+
+        int score = 0;
+        List<String> reasons = new ArrayList<>();
+
+        String[] suspiciousWords = {
+            "urgent",
+            "verify your account",
+            "password",
+            "bank account",
+            "click here",
+            "account suspended",
+            "free prize",
+            "won a lottery",
+            "confirm your identity",
+            "limited time",
+            "otp",
+            "send money"
+        };
+
+        for (String word : suspiciousWords) {
+            if (email.contains(word)) {
+                score += 10;
+                reasons.add("Suspicious phrase: " + word);
+            }
+        }
+
+        if (email.contains("http://")) {
+            score += 15;
+            reasons.add("Unencrypted HTTP link detected");
+        }
+
+        if (email.contains("https://")) {
+            reasons.add("Contains a URL. Verify its destination.");
+        }
+
+        if (email.contains("bit.ly") ||
+            email.contains("tinyurl.com")) {
+            score += 20;
+            reasons.add("URL shortener detected");
+        }
+
+        if (subject.toLowerCase().contains("urgent")) {
+            score += 10;
+            reasons.add("Urgent subject line detected");
+        }
+
+        score = Math.min(score, 100);
+
+        boolean phishing = score >= 30;
+
+        if (reasons.isEmpty()) {
+            reasons.add("No configured suspicious patterns found");
+        }
+
+        return new Result(phishing, score, reasons);
+    }
+}
