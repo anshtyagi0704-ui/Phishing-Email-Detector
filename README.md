@@ -4,6 +4,8 @@ The main purpose of this project is to protect users from cyberattacks in which 
 
 
 Suggested project development plan
+
+
 Phase 1 – Dataset collection
 
 Collect phishing and legitimate email samples.
