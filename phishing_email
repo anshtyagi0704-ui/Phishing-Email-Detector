@@ -1,0 +1,130 @@
+
+import java.awt.*;
+import java.awt.event.*;
+
+public class PhishingEmailDetector extends Frame
+        implements ActionListener {
+
+    Label title, subjectLabel, messageLabel, resultLabel;
+    TextField subjectField;
+    TextArea messageArea, resultArea;
+    Button analyzeButton, clearButton;
+
+    PhishingEmailDetector() {
+
+        setTitle("Phishing Email Detector");
+        setSize(650, 600);
+        setLayout(null);
+        setBackground(new Color(235, 242, 250));
+
+        title = new Label("PHISHING EMAIL DETECTOR");
+        title.setBounds(150, 50, 350, 35);
+        title.setFont(new Font("Arial", Font.BOLD, 22));
+        title.setForeground(new Color(20, 60, 120));
+        add(title);
+
+        subjectLabel = new Label("Email Subject:");
+        subjectLabel.setBounds(60, 115, 150, 25);
+        add(subjectLabel);
+
+        subjectField = new TextField();
+        subjectField.setBounds(60, 145, 510, 30);
+        add(subjectField);
+
+        messageLabel = new Label("Email Message:");
+        messageLabel.setBounds(60, 190, 150, 25);
+        add(messageLabel);
+
+        messageArea = new TextArea();
+        messageArea.setBounds(60, 220, 510, 120);
+        add(messageArea);
+
+        analyzeButton = new Button("Analyze Email");
+        analyzeButton.setBounds(150, 360, 150, 40);
+        analyzeButton.setBackground(new Color(40, 100, 180));
+        analyzeButton.setForeground(Color.WHITE);
+        analyzeButton.addActionListener(this);
+        add(analyzeButton);
+
+        clearButton = new Button("Clear");
+        clearButton.setBounds(330, 360, 120, 40);
+        clearButton.addActionListener(this);
+        add(clearButton);
+
+        resultLabel = new Label("Detection Result:");
+        resultLabel.setBounds(60, 420, 200, 25);
+        resultLabel.setFont(new Font("Arial", Font.BOLD, 15));
+        add(resultLabel);
+
+        resultArea = new TextArea();
+        resultArea.setBounds(60, 450, 510, 100);
+        resultArea.setEditable(false);
+        add(resultArea);
+
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                dispose();
+                System.exit(0);
+            }
+        });
+
+        setLocationRelativeTo(null);
+        setVisible(true);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+
+        if (e.getSource() == analyzeButton) {
+
+            String subject = subjectField.getText();
+            String message = messageArea.getText();
+
+            if (subject.trim().isEmpty() &&
+                message.trim().isEmpty()) {
+
+                resultArea.setText(
+                    "Please enter an email subject or message."
+                );
+                return;
+            }
+
+            EmailAnalyzer.Result result =
+                EmailAnalyzer.analyze(subject, message);
+
+            StringBuilder output = new StringBuilder();
+
+            output.append("Risk Score: ")
+                  .append(result.riskScore)
+                  .append("/100\n\n");
+
+            if (result.phishing) {
+                output.append("WARNING: PHISHING EMAIL DETECTED!\n");
+            } else {
+                output.append("LIKELY LEGITIMATE EMAIL\n");
+            }
+
+            output.append("\nDetection Details:\n");
+
+            for (String reason : result.reasons) {
+                output.append("- ")
+                      .append(reason)
+                      .append("\n");
+            }
+
+            resultArea.setText(output.toString());
+
+        }
+
+        if (e.getSource() == clearButton) {
+
+            subjectField.setText("");
+            messageArea.setText("");
+            resultArea.setText("");
+
+        }
+    }
+
+    public static void main(String[] args) {
+        new PhishingEmailDetector();
+    }
+}
